@@ -1,31 +1,37 @@
-#!/usr/bin/env python
-# Author: Mustafa Faraj (vis.mustafa@gmail.com)
-#
-# This file is part of the Gumstix modification for the LAVA Dispatcher.
-# This file contains all the tests that can run on any Gumstix Overo device.
+# Mustafa Faraj (vis.mustafa@gmail.com)
+# Roxanne Guo (roxane.guo@gmail.com)
 
 import os
 import sys
 import json
 import argparse
+import swprofile, hwprofile
 
 from conmux import ConmuxConnection
-from profile import swprofile, hwprofile
 
 #def is_ascii(s):
 #    return all(ord(c) < 128 for c in s)
 
 def setUp(test_suites, target, result_dir):
-    conn = ConmuxConnection(target, result_dir)
+    """
+    Set up a conmux connection instance, execute and log the board start up sequence
+    """
+    conn = ConmuxConnection(target)
     raw_input("Press <enter> then start the board.")
-    if conn.logBootup():
-        raw_input("Failed to boot up. Press <enter> to continue.")
-    if conn.login():
-        #failed to login to linux. cancel and return something else
-        raw_input("Can not login to the board. Press <enter> to continue.")
+    if not conn.uBoot() or not conn.loginPrompt() or not conn.login():
+        raw_input("Press <enter> to exit.")
+        sys.exit(1)
     run(test_suites, result_dir, conn)
 
 def run(test_suites, result_dir, conn):
+    """
+    Execute each test_suite sequentially
+
+    Each test suite should:
+    - execute test
+    - append to log file
+    - append to "test_results" in bundle file
+    """
     hw_profile = hwprofile.get_hardware_context(conn)
     sw_profile = swprofile.get_hardware_context(conn)
     bundle = {
@@ -71,9 +77,12 @@ def run(test_suites, result_dir, conn):
     output.close()
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Execute tests over serial.")
-    parser.add_argument('target', help='Conmux target name')
-    parser.add_argument('-d', '--results_dir', default=os.getcwd(), help='Test results directory')
+    """
+    Parse out arguments passed from cmd_lava_serial_test
+    """
+    parser = argparse.ArgumentParser(description="Execute tests over a serial interface.")
+    parser.add_argument('target', help='Conmux connection target board name')
+    parser.add_argument('-d', '--results_dir', default=os.getcwd(), help='Bundle file directory')
     parser.add_argument('tests', help='Test suites', nargs='+')
     args = parser.parse_args()
     setUp(args.tests, args.target, args.results_dir)

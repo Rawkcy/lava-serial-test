@@ -1,0 +1,2 @@
+include README
+include lava_android_test/test_definitions/*
