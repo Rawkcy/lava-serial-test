@@ -5,9 +5,12 @@ import os
 import sys
 import json
 import argparse
-import swprofile, hwprofile
+from uuid import uuid4
 
+import swprofile
+import hwprofile
 from conmux import ConmuxConnection
+
 
 #def is_ascii(s):
 #    return all(ord(c) < 128 for c in s)
@@ -19,9 +22,10 @@ def setUp(test_suites, target, result_dir):
     conn = ConmuxConnection(target)
     raw_input("Press <enter> then start the board.")
     if not conn.uBoot() or not conn.loginPrompt() or not conn.login():
-        raw_input("Press <enter> to exit.")
+        raw_input("\nPress <enter> to exit.")
         sys.exit(1)
     run(test_suites, result_dir, conn)
+
 
 def run(test_suites, result_dir, conn):
     """
@@ -32,37 +36,53 @@ def run(test_suites, result_dir, conn):
     - append to log file
     - append to "test_results" in bundle file
     """
-    hw_profile = hwprofile.get_hardware_context(conn)
-    sw_profile = swprofile.get_hardware_context(conn)
+    #hw_profile = hwprofile.get_hardware_context(conn)
+    #sw_profile = swprofile.get_hardware_context(conn)
+    tmp_path = '/tmp/test.txt'
+    with open(tmp_path, 'rb') as stream:
+        data = stream.read()
     bundle = {
-        'format': 'LAVA Serial Test',
-        'test_runs': []
+        'format': 'Dashboard Bundle Format 1.3',
+        'test_runs': [
+            {
+            'test_id': 'stream',
+            'analyzer_assigned_uuid': str(uuid4()),
+            'analyzer_assigned_date': '2010-11-14T13:42:31Z',
+            'time_check_performed': False,
+            #'attributes':{},
+            'test_id': 'example',
+            'test_results':[],
+            'attachments':[
+                {
+                    'pathname': '/tmp/test.txt',
+                    'mime_type': 'text/plain',
+                    'content': base64.standard_b64encode(data)
+                }
+            ],
+            #'hardware_context': '',#hw_profile,
+            #'software_context': ''#sw_profile
+            }
+        ]
     }
-    bundle_template = {
-        'analyzer_assigned_uuid': '',
-        'analyzer_assigned_date': '',
-        'time_check_performed': False,
-        'attributes':{},
-        'test_id': '',
-        'test_results':[],
-        'attachments':[],
-        'hardware_context': hw_profile,
-        'software_context': sw_profile
+    test_result_template = {
+        'measurement': '',
+        'message': '',
+        'test_case_id': '',
+        'result': ''
     }
-    for test_suite in test_suites:
-        # NOTE: this is how LAT does it
-        #importpath = "lava_serial_test.test_suites.%s" % test_suite
-        #test_suite = __import__(importpath)
 
-        # Import python module from string
+    # Run test suites
+    for test_definition in test_definitions:
+        #importpath = "lava_serial_test.test_definitions.%s" % test_definition
+        #test_definition = __import__(importpath)
         try:
-            test_suite = __import__(test_suite)
+            test_definition = __import__(test_definition)
         except ImportError:
-            print "unknown test '%s'" % test_suite
+            print "unknown test '%s'" % test_definition
             sys.exit(1)
         # Run and store each result
-        data = test_suite.run(bundle_template, conn)
-        bundle['test_runs'].append(data)
+        test_result = test_definition.run(test_result_template, conn)
+        bundle['test_runs'][0]['test_results'].append(test_result)
 
     #cleanOut = ''
     #for line in rawOut.split('\n'):
@@ -71,10 +91,12 @@ def run(test_suites, result_dir, conn):
     #    else:
     #        cleanOut = cleanOut + "##Non-Ascii characters were detected here##\n"
 
-    output = open(os.path.join(result_dir,'results'),'wb')
-    # Use json to pass results to lava-dispatch
-    json.dump(bundle, output)
+    # Store bundle file and close pexpect instance
+    output = open(os.path.join(result_dir, '%s.json' % conn.board),'wb')
+    json.dump(bundle, output, indent=2)
     output.close()
+    conn.close()
+
 
 if __name__ == "__main__":
     """
