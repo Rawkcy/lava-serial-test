@@ -1,0 +1,29 @@
+{
+  "job_name": "multiple tests", 
+  "target": "tobi", 
+  "timeout": 18000, 
+  "actions": [ 
+    {
+      "command": "lava_serial_test",
+      "parameters":
+        {
+            "identity": {
+                "name" : "overo",
+                "rev" : "R3256",
+                "code" : "GS3703E-R3265",
+                "order" : "70481"
+            },
+            "tests": ["ping"]
+        }
+    },
+    {
+      "command": "submit_results",
+      "parameters":
+        {
+          "server": "http://rox@10.8.22.140/RPC2/",
+          "stream": "/anonymous/rox/",
+          "token": "nl00aaxl9mxyied106ktg9943l2k4wyb6ntl4zdq43i6nwjx7dbx63wlprelr9xdsu1h80wtaw69eu6s60oj6tky25yzfc9bwzdirislfawreak68hgunkpm8kal0in0"
+        }
+    }
+  ]
+}
