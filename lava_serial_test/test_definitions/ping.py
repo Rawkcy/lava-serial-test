@@ -5,7 +5,10 @@ def run(localResult, conn):
     startTime = time.time()
     result, success = conn.execute(cmd, 30)
     timeDiff = time.time()-startTime
+
     localResult['measurement'] = timeDiff
+    #localResult['command'] = cmd
+    #localResult['response'] = result
     localResult['message'] = result
     localResult['test_case_id']= 'dsp_exists'
     #transmitPackets = output[0:1]
@@ -15,4 +18,5 @@ def run(localResult, conn):
     #else:
     #    localResult['result'] = 'fail'
     localResult['result'] = 'pass'
+
     return localResult

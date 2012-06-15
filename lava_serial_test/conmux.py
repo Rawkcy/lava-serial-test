@@ -5,20 +5,26 @@ import tempfile
 import pexpect
 import os
 
+
 # TODO: conmux connection sometimes requires reset
 class ConmuxConnection():
 
     def __init__(self, board):
         """
         Creates a conmux connection instance for testing over serial
+
+        NOTE::
+            The log file goes into /tmp/***_logs regardless of what
+            directory path is passed into lava-serial-test
         """
         self.board = board
         self.promptString = ''
         self.logDirectory = tempfile.mkdtemp(suffix='_logs')
         if not os.path.exists(self.logDirectory):
             os.makedirs(self.logDirectory)
-        logFile = file(os.path.join(self.logDirectory, "%s.log", % self.board), 'w+')
-        self.proc = pexpect.spawn("conmux-console %s" % self.board, logfile=logfile, timeout=240)
+        logfile = file(os.path.join(self.logDirectory, self.board), 'w+r')
+        self.proc = pexpect.spawn("conmux-console %s" % self.board, timeout=240)
+        self.proc.logfile_read = logfile
         self.proc.setecho(False)
 
     def expectTry(self, cmdToSend, stringToExpect, timeOut):
@@ -80,7 +86,8 @@ class ConmuxConnection():
 
         # NOTE: this may be temporary solution
         # Grab the command line prompt if it exists
-        promptString = open(self.proc.logFile, 'r').readlines()[-1]
+        self.proc.logfile_read.seek(0)
+        promptString = self.proc.logfile_read.readlines()[-1]
         self.promptString = promptString if "@" in promptString else ''
         return test_passed
 

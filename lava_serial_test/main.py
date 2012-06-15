@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Mustafa Faraj (vis.mustafa@gmail.com)
 # Roxanne Guo (roxane.guo@gmail.com)
 
@@ -17,7 +18,8 @@ from conmux import ConmuxConnection
 
 def setUp(test_suites, target, result_dir):
     """
-    Set up a conmux connection instance, execute and log the board start up sequence
+    Set up a conmux connection instance
+    Execute and log the board start up sequence
     """
     conn = ConmuxConnection(target)
     raw_input("Press <enter> then start the board.")
@@ -27,7 +29,7 @@ def setUp(test_suites, target, result_dir):
     run(test_suites, result_dir, conn)
 
 
-def run(test_suites, result_dir, conn):
+def run(test_definitions, result_dir, conn):
     """
     Execute each test_suite sequentially
 
@@ -38,9 +40,9 @@ def run(test_suites, result_dir, conn):
     """
     #hw_profile = hwprofile.get_hardware_context(conn)
     #sw_profile = swprofile.get_hardware_context(conn)
-    tmp_path = '/tmp/test.txt'
-    with open(tmp_path, 'rb') as stream:
-        data = stream.read()
+    #tmp_path = '/tmp/test.txt'
+    #with open(tmp_path, 'rb') as stream:
+    #    data = stream.read()
     bundle = {
         'format': 'Dashboard Bundle Format 1.3',
         'test_runs': [
@@ -53,11 +55,11 @@ def run(test_suites, result_dir, conn):
             'test_id': 'example',
             'test_results':[],
             'attachments':[
-                {
-                    'pathname': '/tmp/test.txt',
-                    'mime_type': 'text/plain',
-                    'content': base64.standard_b64encode(data)
-                }
+                #{
+                #    'pathname': '/tmp/test.txt',
+                #    'mime_type': 'text/plain',
+                #    'content': base64.standard_b64encode(data)
+                #}
             ],
             #'hardware_context': '',#hw_profile,
             #'software_context': ''#sw_profile
@@ -66,6 +68,8 @@ def run(test_suites, result_dir, conn):
     }
     test_result_template = {
         'measurement': '',
+        #'command': '',
+        #'response': '',
         'message': '',
         'test_case_id': '',
         'result': ''
@@ -95,7 +99,7 @@ def run(test_suites, result_dir, conn):
     output = open(os.path.join(result_dir, '%s.json' % conn.board),'wb')
     json.dump(bundle, output, indent=2)
     output.close()
-    conn.close()
+    conn.proc.close()
 
 
 if __name__ == "__main__":
