@@ -1,5 +1,5 @@
-# Mustafa Faraj (vis.mustafa@gmail.com)
-# Roxanne Guo (roxane.guo@gmail.com)
+# Mustafa Faraj (mustafa@gumstix.com)
+# Roxanne Guo (roxanne@gumstix.com
 
 import tempfile
 import pexpect
@@ -9,7 +9,7 @@ import os
 # TODO: conmux connection sometimes requires reset
 class ConmuxConnection():
 
-    def __init__(self, board):
+    def __init__(self, board, result_dir):
         """
         Creates a conmux connection instance for testing over serial
 
@@ -19,13 +19,17 @@ class ConmuxConnection():
         """
         self.board = board
         self.promptString = ''
-        self.logDirectory = tempfile.mkdtemp(suffix='_logs')
-        if not os.path.exists(self.logDirectory):
-            os.makedirs(self.logDirectory)
-        logfile = file(os.path.join(self.logDirectory, self.board), 'w+r')
+        if result_dir == os.getcwd():
+            logfile = file(os.path.join(os.getcwd(), self.board + '.log'), 'w+r')
+        else:
+            logDirectory = result_dir + '_logs'
+            if not os.path.exists(logDirectory):
+                os.makedirs(logDirectory)
+            logfile = file(os.path.join(logDirectory, self.board), 'w+r')
         self.proc = pexpect.spawn("conmux-console %s" % self.board, timeout=240)
         self.proc.logfile_read = logfile
         self.proc.setecho(False)
+
 
     def expectTry(self, cmdToSend, stringToExpect, timeOut):
         """
@@ -38,9 +42,8 @@ class ConmuxConnection():
         try:
             self.proc.expect(stringToExpect, timeout=timeOut)
         except pexpect.TIMEOUT:
-            print "Command '%s' was not successful" % cmdToSend
+            print "Command '%s' timed out" % cmdToSend
             print "Failed to match with '%s'" % stringToExpect
-            raw_input("Press <enter> to continue")
             cmd_passed = False
         return cmd_passed
 
@@ -54,7 +57,7 @@ class ConmuxConnection():
         if self.expectTry(" ", "Starting kernel", 45):
             print "##Sucessfully executed uBoot##"
         else:
-            print "##Failed to execute uBoot => no tests will be ran on this device\n##"
+            print "##Failed to execute uBoot => no tests will be ran on this device##\n"
             test_passed = False
         return test_passed
 
@@ -68,7 +71,7 @@ class ConmuxConnection():
         if self.expectTry("", "login", 90):
             print "##Sucessfully reached log in prompt##"
         else:
-            print "##Failed to execute uBoot => no tests will be ran on this device\n##"
+            print "##Failed to reach Linux login => no tests will be ran on this device##\n"
             test_passed = False
         return test_passed
 
@@ -81,23 +84,22 @@ class ConmuxConnection():
         if self.expectTry("root", "#", 5):
             print "##Logged into Linux##"
         else:
-            print "##Failed to execute uBoot => no tests will be ran on this device\n##"
+            print "##Failed to login => no tests will be ran on this device##\n"
             test_passed = False
 
         # NOTE: this may be temporary solution
         # Grab the command line prompt if it exists
-        self.proc.logfile_read.seek(0)
-        promptString = self.proc.logfile_read.readlines()[-1]
-        self.promptString = promptString if "@" in promptString else ''
+        #self.proc.logfile_read.seek(0)
+        #promptString = self.proc.logfile_read.readlines()[-1]
+        #self.promptString = promptString if "@" in promptString else ''
         return test_passed
 
 
-    def execute(self, cmd, timeOut=30):
+    def execute(self, cmd, response, timeOut=5):
         """
         Wrapper used to execute each test suite
         """
-        # Execute the test
-        if self.expectTry(cmd, self.promptString, timeOut):
+        if self.expectTry(cmd, response, timeOut):
             print "##Successfully executed '%s'##" % cmd
             return self.proc.before + self.proc.after, True
         else:

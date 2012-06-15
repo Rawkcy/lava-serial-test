@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-# Mustafa Faraj (vis.mustafa@gmail.com)
-# Roxanne Guo (roxane.guo@gmail.com)
+# Mustafa Faraj (mustafa@gumstix.com)
+# Roxanne Guo (roxanne@gumstix.com)
 
 import os
 import sys
@@ -13,18 +13,15 @@ import hwprofile
 from conmux import ConmuxConnection
 
 
-#def is_ascii(s):
-#    return all(ord(c) < 128 for c in s)
-
 def setUp(test_suites, target, result_dir):
     """
     Set up a conmux connection instance
     Execute and log the board start up sequence
     """
-    conn = ConmuxConnection(target)
+    conn = ConmuxConnection(target, result_dir)
     raw_input("Press <enter> then start the board.")
     if not conn.uBoot() or not conn.loginPrompt() or not conn.login():
-        raw_input("\nPress <enter> to exit.")
+        raw_input("Something has gone terribly wrong!\nPress <enter> to exit.")
         sys.exit(1)
     run(test_suites, result_dir, conn)
 
@@ -38,8 +35,6 @@ def run(test_definitions, result_dir, conn):
     - append to log file
     - append to "test_results" in bundle file
     """
-    #hw_profile = hwprofile.get_hardware_context(conn)
-    #sw_profile = swprofile.get_hardware_context(conn)
     #tmp_path = '/tmp/test.txt'
     #with open(tmp_path, 'rb') as stream:
     #    data = stream.read()
@@ -47,12 +42,11 @@ def run(test_definitions, result_dir, conn):
         'format': 'Dashboard Bundle Format 1.3',
         'test_runs': [
             {
-            'test_id': 'stream',
+            'test_id': 'tobi',
             'analyzer_assigned_uuid': str(uuid4()),
             'analyzer_assigned_date': '2010-11-14T13:42:31Z',
             'time_check_performed': False,
             #'attributes':{},
-            'test_id': 'example',
             'test_results':[],
             'attachments':[
                 #{
@@ -61,18 +55,10 @@ def run(test_definitions, result_dir, conn):
                 #    'content': base64.standard_b64encode(data)
                 #}
             ],
-            #'hardware_context': '',#hw_profile,
-            #'software_context': ''#sw_profile
+            #'hardware_context': hwprofile.get_hardware_context(conn)
+            #'software_context': swprofile.get_hardware_context(conn)
             }
         ]
-    }
-    test_result_template = {
-        'measurement': '',
-        #'command': '',
-        #'response': '',
-        'message': '',
-        'test_case_id': '',
-        'result': ''
     }
 
     # Run test suites
@@ -85,15 +71,8 @@ def run(test_definitions, result_dir, conn):
             print "unknown test '%s'" % test_definition
             sys.exit(1)
         # Run and store each result
-        test_result = test_definition.run(test_result_template, conn)
-        bundle['test_runs'][0]['test_results'].append(test_result)
-
-    #cleanOut = ''
-    #for line in rawOut.split('\n'):
-    #    if is_ascii(line):
-    #        cleanOut = cleanOut + line
-    #    else:
-    #        cleanOut = cleanOut + "##Non-Ascii characters were detected here##\n"
+        test_result = test_definition.run(conn)
+        bundle['test_runs'][0]['test_results'].extend(test_result)
 
     # Store bundle file and close pexpect instance
     output = open(os.path.join(result_dir, '%s.json' % conn.board),'wb')
