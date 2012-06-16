@@ -8,7 +8,7 @@ import json
 import argparse
 from uuid import uuid4
 
-import swprofile
+#import swprofile
 import hwprofile
 from conmux import ConmuxConnection
 
@@ -38,6 +38,8 @@ def run(test_definitions, result_dir, conn):
     #tmp_path = '/tmp/test.txt'
     #with open(tmp_path, 'rb') as stream:
     #    data = stream.read()
+    hwprof = hwprofile.get_hardware_context(conn)
+    #swprof = swprofile.get_software_context(conn)
     bundle = {
         'format': 'Dashboard Bundle Format 1.3',
         'test_runs': [
@@ -55,8 +57,8 @@ def run(test_definitions, result_dir, conn):
                 #    'content': base64.standard_b64encode(data)
                 #}
             ],
-            #'hardware_context': hwprofile.get_hardware_context(conn)
-            #'software_context': swprofile.get_hardware_context(conn)
+            'hardware_context': hwprof
+            #'software_context': swprof
             }
         ]
     }
@@ -68,8 +70,7 @@ def run(test_definitions, result_dir, conn):
         try:
             test_definition = __import__(test_definition)
         except ImportError:
-            print "unknown test '%s'" % test_definition
-            sys.exit(1)
+            print "UNKNOWN TEST '%s'" % test_definition
         # Run and store each result
         test_result = test_definition.run(conn)
         bundle['test_runs'][0]['test_results'].extend(test_result)

@@ -4,6 +4,7 @@
 import tempfile
 import pexpect
 import os
+import re
 
 
 # TODO: conmux connection sometimes requires reset
@@ -18,7 +19,7 @@ class ConmuxConnection():
             directory path is passed into lava-serial-test
         """
         self.board = board
-        self.promptString = ''
+        self.promptString = 'testing@gumstix\([0-9]+\)#'
         if result_dir == os.getcwd():
             logfile = file(os.path.join(os.getcwd(), self.board + '.log'), 'w+r')
         else:
@@ -87,11 +88,7 @@ class ConmuxConnection():
             print "##Failed to login => no tests will be ran on this device##\n"
             test_passed = False
 
-        # NOTE: this may be temporary solution
-        # Grab the command line prompt if it exists
-        #self.proc.logfile_read.seek(0)
-        #promptString = self.proc.logfile_read.readlines()[-1]
-        #self.promptString = promptString if "@" in promptString else ''
+        self.setPromptString()
         return test_passed
 
 
@@ -105,3 +102,31 @@ class ConmuxConnection():
         else:
             print "##Failed to execute '%s'##" % cmd
             return self.proc.before, False
+
+
+    def setPromptString(self):
+        """
+        Manually setting system's PS1
+        """
+        self.proc.sendline("export PS1='testing@gumstix(`echo -n $?`)# '")
+        # Just to flush out self.proc.before and after
+        self.proc.expect('#', timeout=5)
+
+
+    #FIXME
+    def do(self, cmd, timeout=5):
+        """
+        Returns pexpect's response
+        """
+        import ipdb;ipdb.set_trace()
+        self.proc.sendline(cmd)
+        try:
+            self.proc.expect(self.promptString, timeout=timeout)
+        except pexpect.TIMEOUT:
+            print 'Command %s TIMED OUT' % cmd
+            return (-1, 'pexpect timed out while executing %s ' % cmd)
+
+        info = self.proc.before.split('\n')
+        cmdprompt = info.pop()
+        return_code = int(re.search('(?P<code>[0-9]+)', cmdprompt).group())
+        return (return_code, info)
