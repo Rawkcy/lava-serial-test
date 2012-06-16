@@ -113,12 +113,12 @@ class ConmuxConnection():
         self.proc.expect('#', timeout=5)
 
 
-    #FIXME
+    #TODO: hwprofile and swprofile call this method just to grab stdout
+    # refactor needed terribly
     def do(self, cmd, timeout=5):
         """
-        Returns pexpect's response
+        Returns stdout
         """
-        import ipdb;ipdb.set_trace()
         self.proc.sendline(cmd)
         try:
             self.proc.expect(self.promptString, timeout=timeout)
@@ -126,6 +126,7 @@ class ConmuxConnection():
             print 'Command %s TIMED OUT' % cmd
             return (-1, 'pexpect timed out while executing %s ' % cmd)
 
+        # proc.before or proc.after??
         info = self.proc.before.split('\n')
         cmdprompt = info.pop()
         return_code = int(re.search('(?P<code>[0-9]+)', cmdprompt).group())
