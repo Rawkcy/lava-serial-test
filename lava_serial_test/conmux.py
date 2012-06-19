@@ -19,14 +19,17 @@ class ConmuxConnection():
             directory path is passed into lava-serial-test
         """
         self.board = board
-        self.promptString = 'testing@gumstix\([0-9]+\)#'
+        self.promptString = 'testing@gumstix\([0-9]+\)'
+
+        # If ran standalone, save log and json to specified folder
+        # Otherwise, default to /tmp/*_logs
         if result_dir == os.getcwd():
             logfile = file(os.path.join(os.getcwd(), self.board + '.log'), 'w+r')
         else:
             logDirectory = result_dir + '_logs'
             if not os.path.exists(logDirectory):
                 os.makedirs(logDirectory)
-            logfile = file(os.path.join(logDirectory, self.board), 'w+r')
+            logfile = file(os.path.join(logDirectory, self.board + '.log'), 'w+r')
         self.proc = pexpect.spawn("conmux-console %s" % self.board, timeout=240)
         self.proc.logfile_read = logfile
         self.proc.setecho(False)
@@ -43,10 +46,22 @@ class ConmuxConnection():
         try:
             self.proc.expect(stringToExpect, timeout=timeOut)
         except pexpect.TIMEOUT:
+            # Clear command line with `Ctrl-C and CF`
             print "Command '%s' timed out" % cmdToSend
             print "Failed to match with '%s'" % stringToExpect
+            self.proc.sendintr()
+            self.proc.sendline()
             cmd_passed = False
         return cmd_passed
+
+
+    def setPromptString(self):
+        """
+        Manually setting system's PS1
+        """
+        self.proc.sendline("export PS1='testing@gumstix(`echo -n $?`)# '")
+        # Just to flush out self.proc.before and after
+        self.proc.expect('#', timeout=5)
 
 
     def uBoot(self):
@@ -104,29 +119,20 @@ class ConmuxConnection():
             return self.proc.before, False
 
 
-    def setPromptString(self):
+    def get_shellcmdoutput(self, cmd, timeout=5):
         """
-        Manually setting system's PS1
+        Return profile info
         """
-        self.proc.sendline("export PS1='testing@gumstix(`echo -n $?`)# '")
-        # Just to flush out self.proc.before and after
-        self.proc.expect('#', timeout=5)
-
-
-    #FIXME
-    def do(self, cmd, timeout=5):
-        """
-        Returns pexpect's response
-        """
-        import ipdb;ipdb.set_trace()
         self.proc.sendline(cmd)
+        reg_match = '#.*' + self.promptString
         try:
-            self.proc.expect(self.promptString, timeout=timeout)
+            # Clear the first command match
+            self.proc.expect(reg_match, timeout=timeout)
         except pexpect.TIMEOUT:
             print 'Command %s TIMED OUT' % cmd
             return (-1, 'pexpect timed out while executing %s ' % cmd)
 
-        info = self.proc.before.split('\n')
+        info = self.proc.after.split('\n')[1:]
         cmdprompt = info.pop()
         return_code = int(re.search('(?P<code>[0-9]+)', cmdprompt).group())
         return (return_code, info)

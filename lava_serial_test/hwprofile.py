@@ -2,16 +2,6 @@ import sys
 import re
 
 
-ARM_KEYMAP = {
-    'Processor': 'cpu_model_name',
-    'Features': 'cpu_features',
-    'CPU implementer': 'cpu_implementer',
-    'CPU architecture': 'cpu_architecture',
-    'CPU variant': 'cpu_variant',
-    'CPU part': 'cpu_part',
-    'CPU revision': 'cpu_revision',
-}
-
 ARM_VALMAP = {
     'CPU implementer': lambda value: int(value, 16),
     'CPU architecture': int,
@@ -19,6 +9,14 @@ ARM_VALMAP = {
     'CPU part': lambda value: int(value, 16),
     'CPU revision': int,
 }
+
+
+def _translate_cpuinfo(valmap, key, value):
+    """
+    Translate value using valmap passed in
+    """
+    newval = valmap.get(key, lambda x: x)(value)
+    return newval
 
 
 def get_cpu_devs(conn):
@@ -31,11 +29,10 @@ def get_cpu_devs(conn):
     cpudevs = []
     cpudevs.append({})
 
-    # TODO maybe there is other types
-    keymap, valmap = ARM_KEYMAP, ARM_VALMAP
+    valmap = ARM_VALMAP
 
     try:
-        (retcode, cpuinfo) = conn.do("cat /proc/cpuinfo")
+        (retcode, cpuinfo) = conn.get_shellcmdoutput("cat /proc/cpuinfo")
         if retcode != 0 or cpuinfo is None:
             raise IOError("Failed to get content of file(%s)" % "/proc/cpuinfo")
         for line in cpuinfo:
@@ -45,7 +42,7 @@ def get_cpu_devs(conn):
                 key = key.strip()
                 value = value.strip()
                 try:
-                    key, value = _translate_cpuinfo(keymap, valmap, key, value)
+                    value = _translate_cpuinfo(valmap, key, value)
                 except ValueError:
                     pass
                 if cpudevs[cpunum].get(key):
@@ -69,10 +66,11 @@ def get_mem_devs(conn):
     """
     devices = []
 
-    pattern = re.compile('^(?P<key>.+?)\s*:\s*(?P<value>.+) kB$', re.M)
+    # We don't have '$' at end of regex because of '\r\r'
+    pattern = re.compile('^(?P<key>.+?)\s*:\s*(?P<value>.+) kB', re.M)
 
     try:
-        (retcode, meminfo) = conn.do("cat /proc/meminfo")
+        (retcode, meminfo) = conn.get_shellcmdoutput("cat /proc/meminfo")
         if retcode != 0 or meminfo is None:
             raise IOError("Faile to get content of file(%s)" % "/proc/meminfo")
         for line in meminfo:

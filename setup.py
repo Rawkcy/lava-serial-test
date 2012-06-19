@@ -6,21 +6,27 @@ from setuptools import setup, find_packages
 setup(
     name='lava-serial-test',
     version=':versiontools:lava_serial_test:',
-    author='',
-    author_email='',
-
-    BLAHBLAHBLAH,
-
+    author='Roxanne Guo',
+    author_email='roxanne@gumstix.com',
+    description='Gumstix boards test execution framework over serial interface',
+    long_description=open("README").read(),
     entry_points="""
+    [console_scripts]
+    lava-serial-test=lava_serial_test.main:main
     """,
-    classifiers=[],
+    classifiers=[
+        "Development Status :: Pre - Alpha",
+        "Intended Audience :: Developers",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 2.7",
+        "Topic :: Software Development :: Testing",
+    ],
     install_requires=[
-      'lava-tool >= 0.2',
-      'versiontools >= 1.4',
-      'linaro_dashboard_bundle',
+        'lava-tool >= 0.2',
+        'versiontools >= 1.4',
     ],
     setup_requires=[
-      'versiontools >= 1.4'
+        'versiontools >= 1.4'
     ],
     zip_safe=False,
     include_packages_data=True)

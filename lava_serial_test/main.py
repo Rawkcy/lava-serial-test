@@ -6,9 +6,10 @@ import os
 import sys
 import json
 import argparse
+import base64
 from uuid import uuid4
 
-#import swprofile
+import swprofile
 import hwprofile
 from conmux import ConmuxConnection
 
@@ -35,11 +36,11 @@ def run(test_definitions, result_dir, conn):
     - append to log file
     - append to "test_results" in bundle file
     """
-    #tmp_path = '/tmp/test.txt'
-    #with open(tmp_path, 'rb') as stream:
-    #    data = stream.read()
+    log_path = '/tmp/tobi.log'
+    with open(log_path, 'r') as stream:
+        data = stream.read()
     hwprof = hwprofile.get_hardware_context(conn)
-    #swprof = swprofile.get_software_context(conn)
+    swprof = swprofile.get_software_context(conn)
     bundle = {
         'format': 'Dashboard Bundle Format 1.3',
         'test_runs': [
@@ -48,17 +49,16 @@ def run(test_definitions, result_dir, conn):
             'analyzer_assigned_uuid': str(uuid4()),
             'analyzer_assigned_date': '2010-11-14T13:42:31Z',
             'time_check_performed': False,
-            #'attributes':{},
             'test_results':[],
             'attachments':[
-                #{
-                #    'pathname': '/tmp/test.txt',
-                #    'mime_type': 'text/plain',
-                #    'content': base64.standard_b64encode(data)
-                #}
+                {
+                    'pathname': log_path,
+                    'mime_type': 'text/plain',
+                    'content': base64.standard_b64encode(data)
+                }
             ],
-            'hardware_context': hwprof
-            #'software_context': swprof
+            'hardware_context': hwprof,
+            'software_context': swprof
             }
         ]
     }

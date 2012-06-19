@@ -1,5 +1,6 @@
 import time
 
+# TODO: render the escaped characters in result?
 class ethernet():
 
     def __init__(self, conn):
@@ -16,7 +17,8 @@ class ethernet():
         result, success = self.conn.execute(cmd, response, timeout)
         localResult['measurement'] = time.time() - startTime
         localResult['message'] = result
-        localResult['test_case_id']= 'ifconfig'
+        # trying to return function name: is there a point to this?
+        localResult['test_case_id'] = self.ifconfig.__name__
         localResult['result'] = 'pass' if success else 'fail'
         return localResult
 
@@ -28,7 +30,7 @@ class ethernet():
         result, success = self.conn.execute(cmd, response, timeout)
         localResult['measurement'] = time.time() - startTime
         localResult['message'] = result
-        localResult['test_case_id']= 'ping'
+        localResult['test_case_id'] = self.ping.__name__
         localResult['result'] = 'pass' if success else 'fail'
         return localResult
 
@@ -40,7 +42,7 @@ class ethernet():
         result, success = self.conn.execute(cmd, response, timeout)
         localResult['measurement'] = time.time() - startTime
         localResult['message'] = result
-        localResult['test_case_id']= 'nslookup'
+        localResult['test_case_id'] = self.nslookup.__name__
         localResult['result'] = 'pass' if success else 'fail'
         return localResult
 
@@ -52,7 +54,7 @@ class ethernet():
         result, success = self.conn.execute(cmd, response, timeout)
         localResult['measurement'] = time.time() - startTime
         localResult['message'] = result
-        localResult['test_case_id']= 'wget'
+        localResult['test_case_id'] = self.wget.__name__
         localResult['result'] = 'pass' if success else 'fail'
         return localResult
 
@@ -65,7 +67,7 @@ def run(conn):
     results.append(result)
     result = ethernet_test.ping()
     results.append(result)
-    result = ethernet_test.nslookup()
+    result = ethernet_test.nslookup(10)
     results.append(result)
     result = ethernet_test.wget(20)
     results.append(result)
