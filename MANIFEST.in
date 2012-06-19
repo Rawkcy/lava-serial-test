@@ -1,2 +1,2 @@
 include README
-include lava_android_test/test_definitions/*
+include lava_serial_test/test_definitions/*

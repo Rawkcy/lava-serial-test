@@ -12,7 +12,7 @@ setup(
     long_description=open("README").read(),
     entry_points="""
     [console_scripts]
-    lava-serial-test=lava_serial_test.main:__main__
+    lava-serial-test=lava_serial_test.main:main
     """,
     classifiers=[
         "Development Status :: Pre - Alpha",

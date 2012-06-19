@@ -14,6 +14,18 @@ import hwprofile
 from conmux import ConmuxConnection
 
 
+def main():
+    """
+    Parse out arguments
+    """
+    parser = argparse.ArgumentParser(description="Execute tests over a serial interface.")
+    parser.add_argument('target', help='Conmux connection target board name')
+    parser.add_argument('-d', '--results_dir', default=os.getcwd(), help='Bundle file directory')
+    parser.add_argument('tests', help='Test suites', nargs='+')
+    args = parser.parse_args()
+    setUp(args.tests, args.target, args.results_dir)
+
+
 def setUp(test_suites, target, result_dir):
     """
     Set up a conmux connection instance
@@ -65,12 +77,18 @@ def run(test_definitions, result_dir, conn):
 
     # Run test suites
     for test_definition in test_definitions:
-        #importpath = "lava_serial_test.test_definitions.%s" % test_definition
-        #test_definition = __import__(importpath)
+        importpath = "lava_serial_test.test_definitions.%s" % test_definition
         try:
-            test_definition = __import__(test_definition)
+            test_definition = __import__(importpath)
         except ImportError:
-            print "UNKNOWN TEST '%s'" % test_definition
+            print "Unknown test '%s'" % test_definition
+            continue
+        try:
+            # Grab the test file
+            for mod in importpath.split('.')[1:]:
+                test_definition = getattr(test_definition, mod)
+        except AttributeError:
+            print "Failed to find %s" % test_definition
         # Run and store each result
         test_result = test_definition.run(conn)
         bundle['test_runs'][0]['test_results'].extend(test_result)
@@ -83,12 +101,4 @@ def run(test_definitions, result_dir, conn):
 
 
 if __name__ == "__main__":
-    """
-    Parse out arguments passed from cmd_lava_serial_test
-    """
-    parser = argparse.ArgumentParser(description="Execute tests over a serial interface.")
-    parser.add_argument('target', help='Conmux connection target board name')
-    parser.add_argument('-d', '--results_dir', default=os.getcwd(), help='Bundle file directory')
-    parser.add_argument('tests', help='Test suites', nargs='+')
-    args = parser.parse_args()
-    setUp(args.tests, args.target, args.results_dir)
+    main()
