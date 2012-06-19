@@ -3,3 +3,6 @@
 *.json
 *.log
 uniqueName.py
+env/
+lava_serial_test.egg-info/
+versiontools-1.9.1-py2.7.egg
