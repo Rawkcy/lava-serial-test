@@ -13,20 +13,20 @@ def get_kernel_args(conn):
     return ''.join(info).strip()
 
 
-# read log file and get U-Boot and Texas Instruments
-def get_uboot_info(conn):
-    ti, uboot = '', ''
-    ti_pattern, uboot_pattern = re.compile("Texas Instruments"), re.compile("U-Boot")
-    found_ti, found_uboot = False, False
+# read log file and get U-Boot and spl strings
+def get_log_with_regex(conn, regex):
+    match = ''
+    pattern = re.compile(regex)
 
     # Reset cursor to beginning of file
     conn.proc.logfile_read.seek(0)
     for line in conn.proc.logfile_read:
-        if ti_pattern.search(line) and not found_ti:
-            ti, found_ti = line.strip(), True
-        elif uboot_pattern.search(line) and not found_uboot:
-            uboot, found_uboot = line.strip(), True
-    return ti, uboot
+        if pattern.search(line):
+            match = line.strip()
+            match.replace(' ', '_')
+            break
+    conn.proc.logfile_read.seek(0, 2)
+    return match
 
 
 def get_package_info(conn):
@@ -59,9 +59,13 @@ def get_software_context(conn):
     packages - opkg information for the gumstix device
     """
 
+    packages =  get_package_info(conn)
+    packages.extend([
+        {'name': 'u-boot', 'version': get_log_with_regex(conn, 'U-Boot')},
+        {'name': 'spl', 'version': get_log_with_regex(conn, 'Texas Instruments')},
+        {'name': 'kernel_args', 'version': get_kernel_args(conn)}
+    ])
     software_context = {'image': {'name': get_kernel_details(conn)},
-    #                    'uboot_ti_info': get_uboot_info(conn),
-    #                    'args': get_kernel_args(conn),
-                        'packages': get_package_info(conn)
+                        'packages': packages
                         }
     return software_context
