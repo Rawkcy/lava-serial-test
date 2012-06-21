@@ -9,45 +9,11 @@ import argparse
 import base64
 from uuid import uuid4
 
+import utils
 import swprofile
 import hwprofile
+import bundle_edit
 from conmux import ConmuxConnection
-
-
-def is_ascii(s):
-    return all(ord(c) < 128 for c in s)
-
-def clean_and_return_log(conn):
-    """
-    Clean out non ascii characters from logfile
-    Returns clean list of data
-    """
-    conn.proc.logfile_read.seek(0)
-    lines = conn.proc.logfile_read.readlines()
-    for line in lines:
-        if not is_ascii(line):
-            lines.remove(line)
-    conn.proc.logfile_read.seek(0)
-    conn.proc.logfile_read.writelines(lines)
-    conn.proc.logfile_read.truncate()
-    conn.proc.close()
-    return lines
-
-
-def add_attachments(conn):
-    """
-    Add attachments to the bundle stream
-    """
-    attachments = []
-    logfile = {}
-
-    data = ''.join(clean_and_return_log(conn))
-    logfile['pathname'] = os.path.join(conn.logDirectory, '%s.log' % conn.board)
-    logfile['mime_type'] = 'text/plain'
-    logfile['content'] = base64.standard_b64encode(data)
-    attachments.append(logfile)
-
-    return attachments
 
 
 def main():
@@ -118,7 +84,13 @@ def run(test_definitions, result_dir, conn):
         test_result = test_definition.run(conn)
         bundle['test_runs'][0]['test_results'].extend(test_result)
 
-    bundle['test_runs'][0]['attachments'].extend(add_attachments(conn))
+    # TODO: don't like this code together in main .. should be its own function?
+    logfile = os.path.join(conn.logDirectory, '%s.log' % conn.board)
+    mime_type = 'text/plain'
+    data = ''.join(utils.clean_and_return_log(conn))
+    content = base64.standard_b64encode(data)
+    bundle['test_runs'][0]['attachments'].extend(bundle_edit.add_attachments(conn, logfile, mime_type, content))
+
     # Dump bundle stream
     output = open(os.path.join(result_dir, '%s.json' % conn.board),'wb')
     json.dump(bundle, output, indent=2)
