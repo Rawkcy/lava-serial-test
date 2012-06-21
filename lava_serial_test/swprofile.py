@@ -57,12 +57,15 @@ def get_software_context(conn):
     uboot - the image information of the gumstix device
     args - the command line arguments
     packages - opkg information for the gumstix device
+
+    NOTE: 'version' value is limited to 130 characters
     """
 
     packages =  get_package_info(conn)
     packages.extend([
         {'name': 'u-boot', 'version': get_log_with_regex(conn, 'U-Boot')},
         {'name': 'spl', 'version': get_log_with_regex(conn, 'Texas Instruments')},
+        # FIXME: output exceeds 130 chars, where should it go?
         #{'name': 'kernel_args', 'version': get_kernel_args(conn)}
     ])
     software_context = {'image': {'name': get_kernel_details(conn)},

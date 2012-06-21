@@ -49,6 +49,9 @@ def run(test_definitions, result_dir, conn):
     - execute test
     - append to log file
     - append to "test_results" in bundle file
+
+    NOTE: bundle format can be found at
+        http://linaro-dashboard-bundle.readthedocs.org/en/latest/schema/docs.html
     """
     bundle = {
         'format': 'Dashboard Bundle Format 1.3',
