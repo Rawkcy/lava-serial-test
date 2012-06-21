@@ -63,13 +63,9 @@ def run(conn):
     results = []
     ethernet_test = ethernet(conn)
 
-    result = ethernet_test.ifconfig()
-    results.append(result)
-    result = ethernet_test.ping()
-    results.append(result)
-    result = ethernet_test.nslookup(10)
-    results.append(result)
-    result = ethernet_test.wget(20)
-    results.append(result)
+    results.append(ethernet_test.ifconfig())
+    results.append(ethernet_test.ping())
+    results.append(ethernet_test.nslookup(10))
+    results.append(ethernet_test.wget(20))
 
     return results

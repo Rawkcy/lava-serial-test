@@ -19,17 +19,17 @@ class ConmuxConnection():
             directory path is passed into lava-serial-test
         """
         self.board = board
-        self.promptString = 'testing@gumstix\([0-9]+\)'
+        self.promptRegex = 'testing@gumstix\([0-9]+\)'
 
         # If ran standalone, save log and json to specified folder
         # Otherwise, default to /tmp/*_logs
         if result_dir == os.getcwd():
-            logfile = file(os.path.join(os.getcwd(), self.board + '.log'), 'w+r')
+            self.logDirectory = os.getcwd()
         else:
-            logDirectory = result_dir + '_logs'
-            if not os.path.exists(logDirectory):
-                os.makedirs(logDirectory)
-            logfile = file(os.path.join(logDirectory, self.board + '.log'), 'w+r')
+            self.logDirectory = result_dir + '_logs'
+            if not os.path.exists(self.logDirectory):
+                os.makedirs(self.logDirectory)
+        logfile = file(os.path.join(self.logDirectory, '%s.log' % self.board), 'w+r')
         self.proc = pexpect.spawn("conmux-console %s" % self.board, timeout=240)
         self.proc.logfile_read = logfile
         self.proc.setecho(False)
@@ -124,7 +124,7 @@ class ConmuxConnection():
         Return profile info
         """
         self.proc.sendline(cmd)
-        reg_match = '#.*' + self.promptString
+        reg_match = '#.*' + self.promptRegex
         try:
             # Clear the first command match
             self.proc.expect(reg_match, timeout=timeout)

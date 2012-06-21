@@ -14,6 +14,42 @@ import hwprofile
 from conmux import ConmuxConnection
 
 
+def is_ascii(s):
+    return all(ord(c) < 128 for c in s)
+
+def clean_and_return_log(conn):
+    """
+    Clean out non ascii characters from logfile
+    Returns clean list of data
+    """
+    conn.proc.logfile_read.seek(0)
+    lines = conn.proc.logfile_read.readlines()
+    for line in lines:
+        if not is_ascii(line):
+            lines.remove(line)
+    conn.proc.logfile_read.seek(0)
+    conn.proc.logfile_read.writelines(lines)
+    conn.proc.logfile_read.truncate()
+    conn.proc.close()
+    return lines
+
+
+def add_attachments(conn):
+    """
+    Add attachments to the bundle stream
+    """
+    attachments = []
+    logfile = {}
+
+    data = ''.join(clean_and_return_log(conn))
+    logfile['pathname'] = os.path.join(conn.logDirectory, '%s.log' % conn.board)
+    logfile['mime_type'] = 'text/plain'
+    logfile['content'] = base64.standard_b64encode(data)
+    attachments.append(logfile)
+
+    return attachments
+
+
 def main():
     """
     Parse out arguments
@@ -48,11 +84,6 @@ def run(test_definitions, result_dir, conn):
     - append to log file
     - append to "test_results" in bundle file
     """
-    log_path = '/tmp/tobi.log'
-    with open(log_path, 'r') as stream:
-        data = stream.read()
-    hwprof = hwprofile.get_hardware_context(conn)
-    swprof = swprofile.get_software_context(conn)
     bundle = {
         'format': 'Dashboard Bundle Format 1.3',
         'test_runs': [
@@ -62,15 +93,9 @@ def run(test_definitions, result_dir, conn):
             'analyzer_assigned_date': '2010-11-14T13:42:31Z',
             'time_check_performed': False,
             'test_results':[],
-            'attachments':[
-                {
-                    'pathname': log_path,
-                    'mime_type': 'text/plain',
-                    'content': base64.standard_b64encode(data)
-                }
-            ],
-            'hardware_context': hwprof,
-            'software_context': swprof
+            'attachments':[],
+            'hardware_context': hwprofile.get_hardware_context(conn),
+            'software_context': swprofile.get_software_context(conn)
             }
         ]
     }
@@ -93,11 +118,11 @@ def run(test_definitions, result_dir, conn):
         test_result = test_definition.run(conn)
         bundle['test_runs'][0]['test_results'].extend(test_result)
 
-    # Store bundle file and close pexpect instance
+    bundle['test_runs'][0]['attachments'].extend(add_attachments(conn))
+    # Dump bundle stream
     output = open(os.path.join(result_dir, '%s.json' % conn.board),'wb')
     json.dump(bundle, output, indent=2)
     output.close()
-    conn.proc.close()
 
 
 if __name__ == "__main__":

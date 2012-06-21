@@ -63,7 +63,7 @@ def get_software_context(conn):
     packages.extend([
         {'name': 'u-boot', 'version': get_log_with_regex(conn, 'U-Boot')},
         {'name': 'spl', 'version': get_log_with_regex(conn, 'Texas Instruments')},
-        {'name': 'kernel_args', 'version': get_kernel_args(conn)}
+        #{'name': 'kernel_args', 'version': get_kernel_args(conn)}
     ])
     software_context = {'image': {'name': get_kernel_details(conn)},
                         'packages': packages
