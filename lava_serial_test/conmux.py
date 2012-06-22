@@ -13,6 +13,7 @@ class ConmuxConnection():
     def __init__(self, board, result_dir):
         """
         Creates a conmux connection instance for testing over serial
+        Holds all methods in association with the serial connection
 
         NOTE::
             The log file goes into /tmp/***_logs regardless of what
@@ -121,7 +122,7 @@ class ConmuxConnection():
 
     def get_shellcmdoutput(self, cmd, timeout=5):
         """
-        Return profile info
+        Return output from a shell command
         """
         self.proc.sendline(cmd)
         reg_match = '#.*' + self.promptRegex

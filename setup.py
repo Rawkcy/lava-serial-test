@@ -10,6 +10,7 @@ setup(
     author_email='roxanne@gumstix.com',
     description='Gumstix boards test execution framework over serial interface',
     long_description=open("README").read(),
+    packages=find_packages(),
     entry_points="""
     [console_scripts]
     lava-serial-test=lava_serial_test.main:main

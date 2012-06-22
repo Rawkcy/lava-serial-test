@@ -1,16 +1,24 @@
 import re
 
 
-def get_kernel_details(conn):
-    info = ''
-    (return_code, info) = conn.get_shellcmdoutput('uname -a')
-    return ''.join(info).strip()
+def check_overflow(info):
+    overflow = []
+    for len(''.join(info).strip()) > 130:
+        # No check for if overflow is also too long
+        overflow.append(info.pop())
+    return (info, overflow)
 
 
-def get_kernel_args(conn):
-    info = ''
-    (return_code, info) = conn.get_shellcmdoutput('cat /proc/cmdline')
-    return ''.join(info).strip()
+def get_kernel_details(conn, cmd):
+    (return_code, info) = conn.get_shellcmdoutput(cmd)
+    if return_code != 0:
+        return 'Could not retrieve output of "%s"' % cmd
+    (info, overflow) = check_overflow(info)
+    # Trying to be clever with checking overflow here but this may not actually be a good solution (Ash??)
+    if overflow:
+        overflow_str = ''.join(overflow)
+        conn.proc.logfile_read.write('\nBundle stream parameter length limit exceeded for command "%s"\nAdditional arguments were "%s"\n' % (cmd, overflow_str))
+    return info
 
 
 # read log file and get U-Boot and spl strings
@@ -65,10 +73,9 @@ def get_software_context(conn):
     packages.extend([
         {'name': 'u-boot', 'version': get_log_with_regex(conn, 'U-Boot')},
         {'name': 'spl', 'version': get_log_with_regex(conn, 'Texas Instruments')},
-        # FIXME: output exceeds 130 chars, where should it go?
-        #{'name': 'kernel_args', 'version': get_kernel_args(conn)}
+        {'name': 'kernel_args', 'version': get_kernel_details(conn, 'cat /proc/cmdline')}
     ])
-    software_context = {'image': {'name': get_kernel_details(conn)},
+    software_context = {'image': {'name': get_kernel_details(conn, 'uname -a')},
                         'packages': packages
                         }
     return software_context

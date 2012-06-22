@@ -57,7 +57,7 @@ def run(test_definitions, result_dir, conn):
         'format': 'Dashboard Bundle Format 1.3',
         'test_runs': [
             {
-            'test_id': 'tobi',
+            'test_id': conn.board,
             'analyzer_assigned_uuid': str(uuid4()),
             'analyzer_assigned_date': '2010-11-14T13:42:31Z',
             'time_check_performed': False,
