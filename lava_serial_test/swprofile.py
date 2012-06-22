@@ -19,7 +19,7 @@ def get_kernel_details(conn, cmd):
     if overflow:
         overflow_str = ''.join(overflow)
         conn.proc.logfile_read.write('\n\n**WARNING: Bundle stream parameter length limit exceeded for command "%s"\nAdditional arguments were "%s"\n' % (cmd, overflow_str))
-    return ''.join(checked_info)
+    return ' '.join(checked_info)
 
 
 # read log file and get U-Boot and spl strings

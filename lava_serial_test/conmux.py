@@ -8,7 +8,7 @@ import re
 
 
 # TODO: conmux connection sometimes requires reset
-class ConmuxConnection():
+class ConmuxConnection(object):
 
     def __init__(self, board, result_dir):
         """

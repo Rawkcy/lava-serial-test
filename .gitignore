@@ -1,5 +1,9 @@
-*
+# Ignore all
+/*
+*.pyc
+.*.swp
 
+# Except for
 !README
 !MANIFEST.in
 !setup.py
