@@ -1,1 +1,1 @@
-env/lib/python2.7/site-packages/lava_dispatcher/actions/lava-serial-test.py
+/usr/local/lib/python2.7/dist-packages/lava_dispatcher/actions/lava-serial-test.py

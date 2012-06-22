@@ -3,22 +3,23 @@ import re
 
 def check_overflow(info):
     overflow = []
-    for len(''.join(info).strip()) > 130:
+    info_list = info[0].split(' ')
+    while len(''.join(info_list).strip()) > 130:
         # No check for if overflow is also too long
-        overflow.append(info.pop())
-    return (info, overflow)
+        overflow.append(info_list.pop())
+    return (info_list, overflow)
 
 
 def get_kernel_details(conn, cmd):
     (return_code, info) = conn.get_shellcmdoutput(cmd)
     if return_code != 0:
         return 'Could not retrieve output of "%s"' % cmd
-    (info, overflow) = check_overflow(info)
+    (checked_info, overflow) = check_overflow(info)
     # Trying to be clever with checking overflow here but this may not actually be a good solution (Ash??)
     if overflow:
         overflow_str = ''.join(overflow)
-        conn.proc.logfile_read.write('\nBundle stream parameter length limit exceeded for command "%s"\nAdditional arguments were "%s"\n' % (cmd, overflow_str))
-    return info
+        conn.proc.logfile_read.write('\n\n**WARNING: Bundle stream parameter length limit exceeded for command "%s"\nAdditional arguments were "%s"\n' % (cmd, overflow_str))
+    return ''.join(checked_info)
 
 
 # read log file and get U-Boot and spl strings

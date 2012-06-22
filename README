@@ -1,5 +1,17 @@
-Executing board tests over the serial interface.
+LAVA Serial Test
+================
+
+Executing Gumstix board tests over the serial interface.
 
 **Still very BETA**
 
+Make bundle stream
+------------------
+
+[lava-dashboard-tool](https://wiki.linaro.org/Platform/Validation/LAVA/SubmittingTests) make-stream --dashboard-url http://catalina.gumstix.org/RPC2/ /anonymous/<username>/
+
+TODO
+----
+
 Require tests/ and doc/
+
