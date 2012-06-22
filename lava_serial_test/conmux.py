@@ -14,10 +14,6 @@ class ConmuxConnection(object):
         """
         Creates a conmux connection instance for testing over serial
         Holds all methods in association with the serial connection
-
-        NOTE::
-            The log file goes into /tmp/***_logs regardless of what
-            directory path is passed into lava-serial-test
         """
         self.board = board
         self.promptRegex = 'testing@gumstix\([0-9]+\)'
@@ -40,6 +36,8 @@ class ConmuxConnection(object):
         """
         Modular function used to singularly execute a command and
         expect an output
+
+        Returns whether or not the pexpect matched a result
         """
         cmd_passed = True
         if cmdToSend:
@@ -59,6 +57,8 @@ class ConmuxConnection(object):
     def setPromptString(self):
         """
         Manually setting system's PS1
+
+        Used to extract return code of shell commands
         """
         self.proc.sendline("export PS1='testing@gumstix(`echo -n $?`)# '")
         # Just to flush out self.proc.before and after
@@ -68,7 +68,7 @@ class ConmuxConnection(object):
     def uBoot(self):
         """
         First "test suite" to be executed
-        Begins the log file by loggin uBoot sequence
+        Begins the log file by logging the uBoot sequence
         """
         test_passed = True
         if self.expectTry(" ", "Starting kernel", 45):
@@ -111,6 +111,8 @@ class ConmuxConnection(object):
     def execute(self, cmd, response, timeOut=5):
         """
         Wrapper used to execute each test suite
+
+        Returns the entire execution output as seen by pexpect
         """
         if self.expectTry(cmd, response, timeOut):
             print "##Successfully executed '%s'##" % cmd
@@ -122,7 +124,9 @@ class ConmuxConnection(object):
 
     def get_shellcmdoutput(self, cmd, timeout=5):
         """
-        Return output from a shell command
+        Executes shell command
+
+        Returns the return code as integer and list of stdout
         """
         self.proc.sendline(cmd)
         reg_match = '#.*' + self.promptRegex

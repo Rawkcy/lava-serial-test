@@ -87,7 +87,7 @@ def run(test_definitions, result_dir, conn):
         test_result = test_definition.run(conn)
         bundle['test_runs'][0]['test_results'].extend(test_result)
 
-    # TODO: don't like this code together in main .. should be its own function?
+    # TODO(rox): don't like this code together in main ..
     logfile = os.path.join(conn.logDirectory, '%s.log' % conn.board)
     mime_type = 'text/plain'
     data = ''.join(utils.clean_and_return_log(conn))
