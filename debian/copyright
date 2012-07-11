@@ -1,0 +1,5 @@
+Upstream-Name: lava-serial-test
+Upstream-Contact: Ash Charles <ash@gumstix.com>
+
+Files: *
+Copyright: Copyright 2010-2012, Gumstix, Inc.
