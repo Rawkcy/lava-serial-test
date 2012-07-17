@@ -52,7 +52,7 @@ class MemoryTest(object):
         return localResult
 
 
-# TODO(rox): count shold be passed in through job file
+# TODO(rox): count should be passed in through job file
 def run(conn, count=100):
     results = []
 
@@ -61,3 +61,4 @@ def run(conn, count=100):
     results.append(memory_test.md5sumer(count))
 
     return results
+
