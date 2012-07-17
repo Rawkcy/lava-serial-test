@@ -1,12 +1,12 @@
 import time
 
 
-class DspTest(object):
+class i2cTest(object):
 
     def __init__(self, conn):
         """
-        Test COM's Digital Signal Processor (DSP)
-            - check if DSP is found
+        Test COM's i2c bus communications
+            - check that number of I2C buses is present
         """
         self.conn = conn
 
@@ -27,8 +27,9 @@ class DspTest(object):
 def run(conn):
     results = []
 
-    dsp_test = DspTest(conn)
-    results.append(dsp_test.test_runner('[ -e /dev/dsp ] && echo "pass" || echo "fail"', 'pass'))
+    i2c_test = i2cTest(conn)
+    results.append(i2c_test.test_runner('i2cdetect -F 1', 'yes'))
+    results.append(i2c_test.test_runner('i2cdetect -F 3', 'yes'))
 
     return results
 

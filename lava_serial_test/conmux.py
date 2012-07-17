@@ -1,5 +1,5 @@
 # Mustafa Faraj (mustafa@gumstix.com)
-# Roxanne Guo (roxanne@gumstix.com
+# Roxanne Guo (roxanne@gumstix.com)
 
 import tempfile
 import pexpect
