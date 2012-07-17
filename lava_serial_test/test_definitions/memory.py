@@ -1,33 +1,19 @@
-import time
+"""
+Memory test suite
+
+`dd` | create half a gig sized file
+`md5sum` | match the md5sum value
+"""
+
+from test_runner import TestRunner
 
 
 class MemoryTest(object):
 
     def __init__(self, conn):
-        """
-        Tests the board's memory unit by
-            - creating half a gig sized file
-            - matching the md5sum value
-        """
         self.conn = conn
 
-    # TODO: specific file generation parameters?
-    def randomFileGen(self, timeout=5):
-        """
-        Generate file of randomness with given size
-        """
-        localResult = {}
-        cmd = 'dd if=/dev/zero of=/home/root/MemoryTest count=1024 bs=1024'
-        response = '1048576 bytes'
-        result, success = self.conn.execute(cmd, response, timeout)
-        startTime = time.time()
-        localResult['measurement'] = time.time() - startTime
-        localResult['message'] = result
-        localResult['test_case_id'] = self.randomFileGen.__name__
-        localResult['result'] = 'pass' if success else 'fail'
-        return localResult
-
-    # NOTE: suppress the output?
+    # NOTE: suppress the bajillion outputs?
     def md5sumer(self, count, timeout=5):
         """
         Successively recalculate the md5sum and compares correctness
@@ -52,13 +38,14 @@ class MemoryTest(object):
         return localResult
 
 
-# TODO(rox): count should be passed in through job file
+# TODO(rox): count could be passed in through job file
 def run(conn, count=100):
     results = []
-
     memory_test = MemoryTest(conn)
-    results.append(memory_test.randomFileGen(100))
+    test_runner = TestRunner(conn)
+
     results.append(memory_test.md5sumer(count))
+    results.append(test_runner.run('dd if=/dev/zero of=/home/root/MemoryTest count=1024 bs=1024', '1048576 bytes', 100))
 
     return results
 

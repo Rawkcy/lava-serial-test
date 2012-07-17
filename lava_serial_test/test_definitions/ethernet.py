@@ -14,6 +14,7 @@ from test_runner import TestRunner
 def run(conn):
     results = []
     test_runner = TestRunner(conn)
+
     results.append(test_runner.run('ifconfig', 'eth[0-9]+'))
     results.append(test_runner.run('ping -c 4 8.8.8.8', '[0-9]+ received'))
     results.append(test_runner.run('nslookup cumulus.gumstix.org', '74.3.164.55', 10))
