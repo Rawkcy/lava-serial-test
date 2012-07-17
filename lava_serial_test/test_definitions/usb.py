@@ -5,9 +5,9 @@ class UsbTest(object):
     def __init__(self, conn):
         """
         Tests the board's USB connections by
-            - `lsusb` | check  that USB host detected
-            - `lsusb` | check that USB OTG port detected
-            - `lsusb` | check that console port detected
+            - check if USB host detected
+            - check if USB OTG port detected
+            - check if console port detected
         """
         self.conn = conn
 
@@ -38,3 +38,4 @@ def run(conn):
     #results.append(usb_test.test_runner('evtest /dev/input/event4', 'Future'))
 
     return results
+

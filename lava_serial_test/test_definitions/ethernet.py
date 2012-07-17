@@ -1,10 +1,4 @@
 import time
-    results.append(ethernet_test.test_runner('ifconfig', 'eth[0-9]+'))
-    results.append(ethernet_test.test_runner('ping -c 4 8.8.8.8', '[0-9]+ received'))
-    results.append(ethernet_test.test_runner('nslookup cumulus.gumstix.org', '74.3.164.55', 10))
-    results.append(ethernet_test.test_runner('wget www.google.com', '200 OK', 20))
-    results.append(ethernet_test.test_runner('dmesg', 'irq 336'))
-
 
 
 class EthernetTest(object):
@@ -45,3 +39,4 @@ def run(conn):
     results.append(ethernet_test.test_runner('dmesg', 'irq 336'))
 
     return results
+

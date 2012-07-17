@@ -61,3 +61,4 @@ def run(conn, count=100):
     results.append(memory_test.md5sumer(count))
 
     return results
+
