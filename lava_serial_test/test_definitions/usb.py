@@ -1,11 +1,13 @@
 import time
 
-
-class EthernetTest(object):
+class UsbTest(object):
 
     def __init__(self, conn):
         """
-        Tests the board's ethernet connectivity
+        Tests the board's USB connections by
+            - check we have right amount of USB ports
+            -
+            -
         """
         self.conn = conn
 
@@ -26,10 +28,7 @@ class EthernetTest(object):
 def run(conn):
     results = []
 
-    ethernet_test = EthernetTest(conn)
-    results.append(ethernet_test.test_runner('ifconfig', 'eth[0-9]+'))
-    results.append(ethernet_test.test_runner('ping -c 4 8.8.8.8', '[0-9]+ received'))
-    results.append(ethernet_test.test_runner('nslookup cumulus.gumstix.org', '74.3.164.55', 10))
-    results.append(ethernet_test.test_runner('wget www.google.com', '200 OK', 20))
+    usb_test = UsbTest(conn)
+    results.append(usb_test.test_runner('lsusb', 'Bus 001 Device 00[2-9]'))
 
     return results
