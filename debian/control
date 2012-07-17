@@ -1,0 +1,21 @@
+Source: lava-serial-test
+Section: admin
+Priority: optional
+Build-Depends: debhelper (>= 7.0.50~),
+               lsb-release,
+               python,
+               python-setuptools (>= 0.6b3),
+               python-support (>= 0.8.4),
+               python-versiontools
+Standards-Version: 3.9.1
+Maintainer: Ash Charles <ash@gumstix.com>
+Homepage: http://www.gumstix.com
+
+Package: lava-serial-test
+Architecture: all
+Depends: python-setuptools (>= 0.6b3),
+         python-versiontools,
+         ${misc:Depends},
+         ${python:Depends}
+Provides: ${python:Provides}
+Description: LAVA test execution framework via a serial port.
