@@ -29,7 +29,7 @@ class WirelessTest(object):
 def run(conn):
     results = []
 
-    wireless_test = WirlessTest(conn)
+    wireless_test = WirelessTest(conn)
     results.append(wireless_test.test_runner('dmesg', 'libertas'))
     results.append(wireless_test.test_runner('ifconfig', 'wlan[0-9]'))
     results.append(wireless_test.test_runner('hciconfig', 'hci0'))
