@@ -47,8 +47,8 @@ def run(conn, count=100):
     test_runner = TestRunner(conn, test_name)
     memory_test = MemoryTest(conn)
 
-    results.append(memory_test.md5sumer(count))
     results.append(test_runner.run('dd if=/dev/zero of=/home/root/MemoryTest count=1024 bs=1024', '1048576 bytes', 100))
+    results.append(memory_test.md5sumer(count))
 
     return results
 
