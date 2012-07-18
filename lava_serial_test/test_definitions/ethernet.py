@@ -8,7 +8,7 @@ Ethernet test suite
 `dmesg` | check for irq 336 in kernel boot
 """
 
-from test_runner import TestRunner
+from lava_serial_test.test_runner import TestRunner
 
 
 def run(conn):

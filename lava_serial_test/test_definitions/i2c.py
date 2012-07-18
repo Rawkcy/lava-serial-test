@@ -4,7 +4,7 @@ i2c test suite
 `i2cdetect` | check that number of I2C buses is present
 """
 
-from test_runner import TestRunner
+from lava_serial_test.test_runner import TestRunner
 
 
 def run(conn):

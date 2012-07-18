@@ -8,7 +8,7 @@ USB test suite
 `evtest` | mouse test
 """
 
-from test_runner import TestRunner
+from lava_serial_test.test_runner import TestRunner
 
 
 def run(conn):
