@@ -6,7 +6,7 @@ Bluetooth and Wifi test suite
 `dmesg` | check that Wi2Wi Transceiver is found
 """
 
-from test_runner import TestRunner
+from lava_serial_test.test_runner import TestRunner
 
 
 def run(conn):

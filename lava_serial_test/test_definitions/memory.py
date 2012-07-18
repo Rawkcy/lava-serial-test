@@ -5,7 +5,8 @@ Memory test suite
 `md5sum` | match the md5sum value
 """
 
-from test_runner import TestRunner
+import time
+from lava_serial_test.test_runner import TestRunner
 
 
 class MemoryTest(object):
