@@ -5,8 +5,9 @@ Memory test suite
 `md5sum` | match the md5sum value
 """
 
-import os
 import time
+from os.path import splitext, basename
+
 from lava_serial_test.test_runner import TestRunner
 
 
@@ -43,7 +44,7 @@ class MemoryTest(object):
 # TODO(rox): count could be passed in through job file
 def run(conn, count=100):
     results = []
-    test_name = os.path.basename(__file__)
+    test_name = splitext(basename(__file__))
     test_runner = TestRunner(conn, test_name)
     memory_test = MemoryTest(conn)
 
