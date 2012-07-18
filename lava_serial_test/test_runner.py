@@ -7,8 +7,9 @@ import time
 
 class TestRunner(object):
 
-    def __init__(self, conn):
+    def __init__(self, conn, test_name):
         self.conn = conn
+        self.test_name = test_name
 
     def run(self, cmd, response, timeout=5):
         localResult = {}
@@ -16,7 +17,7 @@ class TestRunner(object):
         result, success = self.conn.execute(cmd, response, timeout)
         localResult['measurement'] = time.time() - startTime
         localResult['message'] = result
-        localResult['test_case_id'] = '%s | %s' % (self.__class__.__name__, cmd)
+        localResult['test_case_id'] = '%s | %s' % (self.test_name, cmd)
         localResult['result'] = 'pass' if success else 'fail'
         return localResult
 
