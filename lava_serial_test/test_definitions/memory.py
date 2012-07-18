@@ -44,7 +44,7 @@ class MemoryTest(object):
 # TODO(rox): count could be passed in through job file
 def run(conn, count=100):
     results = []
-    test_name = splitext(basename(__file__))
+    test_name = splitext(basename(__file__))[0]
     test_runner = TestRunner(conn, test_name)
     memory_test = MemoryTest(conn)
 

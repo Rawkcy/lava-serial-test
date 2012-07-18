@@ -12,7 +12,7 @@ from lava_serial_test.test_runner import TestRunner
 
 def run(conn):
     results = []
-    test_name = splitext(basename(__file__))
+    test_name = splitext(basename(__file__))[0]
     test_runner = TestRunner(conn, test_name)
 
     results.append(test_runner.run('ifconfig', 'wlan[0-9]'))
